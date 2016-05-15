@@ -19,116 +19,72 @@
                 <h2>Los geht's</h2>
                 <div id="upload">
 <?php
-// kopiert
-// sorry die db kann ich dir nicht geben
-// n "cache" wäre ganz nett, jedes mal ne db abfrage durchzuführen ist vllt n bisschen heftig
-// WICHTIG: pw auf externe datei auslagern
-$verbindung = mysql_connect ("xxx","xx", "xxx") or die ("keine Verbindung möglich. Benutzername oder Passwort sind falsch");
+$connection = mysql_connect ("xxx","xxx", "xxx") or die ("keine Verbindung möglich. Benutzername oder Passwort sind falsch");
 mysql_select_db("xxx") or die ("Die Datenbank existiert nicht.");
 $unhashedIp = getenv ("REMOTE_ADDR");
-// ich weiss die namen der variablen sind einfach nur mega beschissen
-// bringts was die ip zu hashen?
-$ip = md5($unhashedIp);
-$abfrage = "SELECT tstamp FROM pr0verter WHERE ip = '$ip'";
-$tim = time();
-$stam = $tim;
-$ergebnis = mysql_query($abfrage);
-$boo = false;
 
-	while($row = mysql_fetch_object($ergebnis))
+$ip = md5($unhashedIp);
+
+// tstamp=timestamp
+$query = "SELECT tstamp FROM pr0verter WHERE ip = '$ip'"; 
+$time = time();
+$stamp = $time;
+$result = mysql_query($query);
+$isExisting = false;
+
+	while($row = mysql_fetch_object($result))
 	   {
-		   $boo = true;
-		   $stam = $row->tstamp;
-		}
-if($boo){
-	if(($tim-$stam) > 60){ 
-		?>
-<form action="upload.php" name="fu2" method="post" id="fu" enctype="multipart/form-data">
-		<input type="file" name="datei" id="fileupload">
-		</form>
-		<p>ODER remote Upload</p>
-		<form action="upload.php" name="rm" method="get" enctype="multipart/form-data">
-		<input type="text" size=30 name="remote_upload" id="ru" placeholder="z.B http://i.imgur.com/mGtnm6U.webm">
-		</form>
-		<br>
-		<p> Größe die das Video haben soll in MB </p>
-		<input type="number" id="limit" name="limit" min="1" max="30" value="4">
-		<script>
-			function cphp(){
-				var remote = document.getElementById("ru").value;
-				var fileul = document.getElementById("fu").value;
-				var bool = false;
-				if(remote != ""){
-					document.rm.submit();
-					bool = true;
-				}
-				if(fileul != ""){
-					if(bool != true){
-						document.fu2.submit();
-						bool = true;
-					}
-					
-				}
-				if(bool == false){
-					alert("Wähl was aus du oppa");
-				}
-				
-				var nameValue = document.getElementById("limit").value;
-				var second = "limit=" + nameValue;
-				document.cookie=second;
-			}
-			</script>
-			<br>
-			<input type="submit" value="Konvertieren" onclick="cphp()">
-		<?php
-	} else {
+	   	$isExisting = true;
+	   	$stamp = $row->tstamp;
+	   }
+	   
+//is ip in db
+if($isExisting){ 
+	if(($time-$stamp) < 60){
 		echo "<script>
 			alert('Du kannst nur jede minute ein Video konvertieren :/');
-		</script>";
+			</script>";	
 	}
-} else {
-?>
-		<form action="upload.php" name="fu2" method="post" id="fu" enctype="multipart/form-data">
+}
+		?>
+<form action="upload.php" name="browserUpload" method="post" id="browserUpload" enctype="multipart/form-data">
 		<input type="file" name="datei" id="fileupload">
 		</form>
 		<p>ODER remote Upload</p>
-		<form action="upload.php" name="rm" method="get" enctype="multipart/form-data">
-		<input type="text" size=30 name="remote_upload" id="ru" placeholder="z.B http://i.imgur.com/mGtnm6U.webm">
+		<form action="upload.php" name="remoteUpload" id="remoteUpload" method="get" enctype="multipart/form-data">
+		<input type="text" size=30 name="remote_upload" id="remoteUpload" placeholder="z.B http://i.imgur.com/mGtnm6U.webm">
 		</form>
 		<br>
 		<p> Größe die das Video haben soll in MB </p>
 		<input type="number" id="limit" name="limit" min="1" max="30" value="4">
 		<script>
 			function cphp(){
-				var remote = document.getElementById("ru").value;
-				var fileul = document.getElementById("fu").value;
-				var bool = false;
-				if(remote != ""){
-					document.rm.submit();
-					bool = true;
+				var remote = document.getElementById("remoteUpload").value;
+				var browser = document.getElementById("browserUpload").value;
+				var isSelected = false;
+				
+				if(new String(remote).valueOf() != new String("undefined").valueOf()){
+					alert(remote);
+					document.remoteUpload.submit();
+					isSelected = true;
 				}
-				if(fileul != ""){
-					if(bool != true){
-						document.fu2.submit();
-						bool = true;
+				if(new String(browser).valueOf() != new String("undefined").valueOf()){
+					if(isSelected != true){
+						alert(2);
+						document.browserUpload.submit();
+						isSelected = true;
 					}
-					
 				}
-				if(bool == false){
+				if(isSelected == false){
 					alert("Wähl was aus du oppa");
 				}
 				
-				var nameValue = document.getElementById("limit").value;
-				var second = "limit=" + nameValue;
-				document.cookie=second;
+				
+				document.cookie= "limit=" + (document.getElementById("limit").value);
 			}
 			</script>
 			<br>
 			<input type="submit" value="Konvertieren" onclick="cphp()">
-		<?php
-}
-
-?>
 
 <h5>Kontakt: pr0verter@gmail.com</h5>
 
