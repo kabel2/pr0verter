@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
         <meta charset="UTF-8">
@@ -28,12 +28,10 @@
 <?php
 require '/home/marius/cloudconvert-php/vendor/autoload.php';
 use \CloudConvert\Api;
-
-// code gore
 function isSupported($arg){
 	$supportedTypes = array("webm", "mp4", "mkv", "mov", "avi", "wmv", "flv", "3gp", "gif");
 	$supported = 0;
-	$wem = false;
+	$webm = false;
 	$supportgif = false;
 	for($i=0; $i < count($supportedTypes); $i++)
 	{
@@ -43,7 +41,7 @@ function isSupported($arg){
 				$supportgif = true;
 			}
 			if(strcasecmp($arg, "webm")==0){
-				$wem = true;
+				$webm = true;
 			}
 			$supported = 1;
 			break;
@@ -53,7 +51,7 @@ function isSupported($arg){
 	if($supported == 0){
 		return 0;
 	}
-	if($wem){
+	if($webm){
 		return 2;
 	}
 	if($supportgif){
@@ -62,91 +60,105 @@ function isSupported($arg){
 	return 1;
 }
 
-// der name sollte vllt kürzer sein
 function randomName(){
 	$milliseconds = round(microtime(true) * 1000);
 	$hash = md5($milliseconds.uniqid());
 	return $hash;
 }
 
-$verbindung = mysql_connect ("xx","xx", "xx") or die ("keine Verbindung möglich. Benutzername oder Passwort sind falsch");
-mysql_select_db("xxx") or die ("Die Datenbank existiert nicht.");
-$nip = getenv ("REMOTE_ADDR");
-$ip = md5($nip);
-$abfrage = "SELECT tstamp FROM pr0verter WHERE ip = '$ip'";
-$tim = time();
-$stam = $tim;
-$ergebnis = mysql_query($abfrage);
-$boo = false;
-
-	while($row = mysql_fetch_object($ergebnis))
-	   {
-		   $boo = true;
-		   $stam = $row->tstamp;
-		}
-if($boo == false){
-	$abfrage2 = "SELECT COUNT(ip) FROM pr0verter";
-	$ergebnis2 = mysql_query($abfrage2);
-	$menge = mysql_fetch_row($ergebnis2);
-	$menge = $menge[0];
-	$sql = "INSERT INTO pr0verter (num, ip, tstamp) VALUES ('$menge', '$ip', '$tim')";
-	$row = $menge;
-	$out = mysql_query($sql);
-	$boo = true;
+function extractFileName($url){
+	$namearray = explode("/",$url);
+	$size = count($namearray);
+	$size = $size-1;
+	return $namearray[$size];
 }
 
-$toobig;
+function extractFormat($url){
+	$namearray = explode("/",$url);
+	$size = count($namearray);
+	$size = $size-1;
+	$format = explode(".", $namearray[$size])[1];
+	return $format;
+}
+
+$verbindung = mysql_connect ("xxx","xxx", "xxx") or die ("keine Verbindung möglich. Benutzername oder Passwort sind falsch");
+mysql_select_db("xxx") or die ("Die Datenbank existiert nicht.");
+$ip = getenv ("REMOTE_ADDR");
+$hashedIp = md5($ip);
+$query = "SELECT tstamp FROM pr0verter WHERE ip = '$hashedIp'";
+$currentTimestamp = time();
+$timestamp = $currentTimestamp;
+$result = mysql_query($query);
+$isIpExisting = false;
+
+	while($row = mysql_fetch_object($result))
+	   {
+		   $isIpExisting = true;
+		   $timestamp = $row->tstamp;
+		}
+if($isIpExisting == false){
+	$query = "SELECT COUNT(ip) FROM pr0verter";
+	$result = mysql_query($query);
+	$row = mysql_fetch_row($result);
+	$row = $row[0];
+	$sql = "INSERT INTO pr0verter (num, ip, tstamp) VALUES ('$row', '$hashedIp', '$currentTimestamp')";
+	$out = mysql_query($sql);
+	$isIpExisting = true;
+}
+
 $toobig = false;
 
-if($boo){
-	if(($tim-$stam) > 60 OR ($tim-$stam) == 0){
+if($isIpExisting){
+	if(($currentTimestamp-$timestamp) > 60 OR ($currentTimestamp-$timestamp) == 0){
 		$gformat = "";
-		$namehash = "";
+		$filehash = "";
+		$videoPath = "/var/www/videos/";
 		if(isset($_GET["remote_upload"])){
-			$name = $_GET["remote_upload"];
-
-			$namearray = explode("/",$name);
-			$size = count($namearray);
-			$size = $size-1;
-			$format = explode(".", $namearray[$size])[1];
-			$randomOut = randomName();
-			$random = $randomOut.".".$format;
-			$ll = isSupported($format);
-			$filesize = exec("wget --spider $name 2>&1 | awk '/Length/ {print $2}'");
-			if($ll==1){
+			$url = $_GET["remote_upload"];
+			
+			$format = extractFormat($url);
+			$fileName = extractFileName($url);
+			
+			$randomTitle = randomName(); 
+			$newFileName = $randomTitle.".".$format; 
+			$webmName = $randomTitle.".webm";
+			$supported = isSupported($format); 
+			$url = escapeshellarg($url);
+			// muss mit fopen ersetzt werden
+			$filesize = exec("wget --spider $url 2>&1 | awk '/Length/ {print $2}'");
+			if($supported==1){
 				if($filesize < 50000000){
-					exec("wget -P /var/www/videos -A webm,mp4,mkv,mov,avi,wmv,flv,3gp,gif $name");
-					exec("mv /var/www/videos/$namearray[$size] /var/www/videos/$random");
-					$namehash = $randomOut;
+					exec("wget -P $videoPath -A webm,mp4,mkv,mov,avi,wmv,flv,3gp,gif $url");
+					exec("mv $videoPath.$fileName $videoPath.$newFileName");
+					$filehash = $randomTitle;
 				} else {
-					echo "hmmm die Datei ist über 50MB gross :/";
+					echo "hmmm die Datei ist über 50MB groß :/";
 					return;
 				}
 			} else {
-				if($ll==0){
-					echo "nur webm, mp4, mkv, mov, avi, wmv, flv, 3gp, gif";
-					echo "nur direkte links. yt, fb und co funktionieren NICHT, nutzt dafür http://keepvid.com/";
-					
+				if($supported==0){
+					echo "nur webm, mp4, mkv, mov, avi, wmv, flv, 3gp, gif1";
+					echo "nur direkte links. yt, fb und co funktionieren NICHT, nutzt dafür http://keepvid.com/";				
 					return;
 				}
-				if($ll==3){
+				if($supported==3){
 					if($filesize < 50000000){
-						exec("wget -P /var/www/videos -A webm,mp4,mkv,mov,avi,wmv,flv,3gp,gif $name");
-						exec("mv /var/www/videos/$namearray[$size] /var/www/videos/$random");
+						exec("wget -P $videoPath -A webm,mp4,mkv,mov,avi,wmv,flv,3gp,gif $name");
+						exec("mv $videoPath.$fileName $videoPath.$newFileName");
 						
-						
+						//ffmpeg kommt mit gif nicht klar, ich hab schon alles versucht
+						//deshalb jetzt cloudconvert.com
 						$api = new Api("xxx");
 
 						$api->convert([
 							'inputformat' => 'gif',
 							'outputformat' => 'webm',
 							'input' => 'upload',
-							'file' => fopen('/var/www/videos/'.$random, 'r'),
+							'file' => fopen($videoPath.$newFileName, 'r'),
 						])
 						->wait()
-						->download('/var/www/videos/'.$randomOut."."."webm");
-						$namehash = $randomOut;
-						if(filesize("/var/www/videos/".$namehash."."."webm") > 4194000){
+						->download($videoPath.$webmName);
+						if(filesize($videoPath.$webmName) > 4194000){
 							$toobig = true;
 						}
 					} else {
@@ -154,19 +166,18 @@ if($boo){
 						return;
 					}
 				}
-				if($ll==2){
+				if($supported==2){
 					if($filesize < 50000000){
-						$random = $randomOut.".source.".$format;
-						exec("wget -P /var/www/videos -A webm,mp4,mkv,mov,avi,wmv,flv,3gp,gif $name");
-						exec("mv /var/www/videos/$namearray[$size] /var/www/videos/$random");
-						$namehash = $randomOut.".source";
+						exec("wget -P $videoPath -A webm,mp4,mkv,mov,avi,wmv,flv,3gp,gif $url");
+						exec("mv ".$videoPath.$fileName." ".$videoPath.$randomTitle.".source.webm");
+						$filehash = $randomTitle.".source";
 					} else {
 						echo "hmmm die Datei ist über 50MB gross :/";
 						return;
 					}
 				} else {
-					if($ll != 3){
-						echo "nur webm, mp4, mkv, mov, avi, wmv, flv, 3gp, gif";
+					if($supported != 3){
+						echo "nur webm, mp4, mkv, mov, avi, wmv, flv, 3gp, gif2";
 						return;
 					}
 				}
@@ -176,18 +187,18 @@ if($boo){
 			
 			
 		} else {
-			$name = $_FILES['datei']['name'];
-			$format = pathinfo('/var/www/videos/'.$name, PATHINFO_EXTENSION);
-			$llimit = 4;
-			$randomOut = randomName();
-			$random = $randomOut.".".$format;
-			$ll = isSupported($format);
-			error_log($ll.":".$format.":".$name);
-			if($ll==1){
-				$namehash = $randomOut;
+			$fileName = $_FILES['datei']['name'];
+			$format = pathinfo($videoPath.$fileName, PATHINFO_EXTENSION);
+			$sizeLimit = 4; //llimit
+			$randomTitle = randomName();
+			$newFileName = $randomTitle.".".$format;
+			$webmName = $randomTitle.".webm";
+			$supported = isSupported($format);
+			if($supported==1){
+				$filehash = $randomTitle;
 			} else {
-				if($ll==3){
-						move_uploaded_file($_FILES['datei']['tmp_name'], "/var/www/videos/".$random);
+				if($supported==3){
+						move_uploaded_file($_FILES['datei']['tmp_name'], $videoPath.$newFileName);
 						
 						$api = new Api("xxx");
 
@@ -195,70 +206,70 @@ if($boo){
 							'inputformat' => 'gif',
 							'outputformat' => 'webm',
 							'input' => 'upload',
-							'file' => fopen('/var/www/videos/'.$random, 'r'),
+							'file' => fopen($videoPath.$newFileName, 'r'),
 						])
 						->wait()
-						->download('/var/www/videos/'.$randomOut."."."webm");
-						$namehash = $randomOut;
-						if(filesize("/var/www/videos/".$namehash."."."webm") > 4194000){
+						->download($videoPath.$webmName);
+						$filehash = $randomOut;
+						if(filesize($videoPath.$webmName) > 4194000){
 							$toobig = true;
 						}
 				}
-				if($ll==0){
-					echo "nur webm, mp4, mkv, mov, avi, wmv, flv, 3gp, gif";
+				if($supported==0){
+					echo "nur webm, mp4, mkv, mov, avi, wmv, flv, 3gp, gif3";
 					return;
 				}
 			}
-			if($ll==2){
-				$random = $randomOut.".source.".$format;
-				$namehash = $randomOut.".source";
+			if($supported==2){
+				$newFileName = $randomTitle.".source.".$format;
+				$filehash = $randomOut.".source";
 			}
 			$gformat = $format;
-			if($ll != 3){
-				move_uploaded_file($_FILES['datei']['tmp_name'], "/var/www/videos/".$random);
+			if($supported != 3){
+				move_uploaded_file($_FILES['datei']['tmp_name'], $videoPath.$newFileName);
 			}
 			$gformat = $format;
 		}
-		if(strcasecmp($namehash, "") == 0){
+		if(strcasecmp($filehash, "") == 0){
 			echo "Ohhhh irgendwas ist schief gelaufen, Sorry :/";
 			return;
 		}
-		$abfrage2 = "SELECT COUNT(ip) FROM pr0verter";
-		$ergebnis2 = mysql_query($abfrage2);
-		$menge = mysql_fetch_row($ergebnis2);
-		$menge = $menge[0];
-		$aendern = "UPDATE pr0verter SET tstamp='$tim' WHERE ip='$ip';";
-		$update = mysql_query($aendern);
+		$query = "SELECT COUNT(ip) FROM pr0verter";
+		$result = mysql_query($query);
+		$row = mysql_fetch_row($result);
+		$row = $row[0];
+		$updateTime = "UPDATE pr0verter SET tstamp='$currentTimestamp' WHERE ip='$hashedIp';";
+		$update = mysql_query($updateTime);
 		
-		if($toobig == true OR $ll != 3){
+		if($toobig == true OR $supported != 3){
 		
 
-		$movie = new ffmpeg_movie("/var/www/videos/$namehash.$format", false);
-		$duration = $movie->getDuration()+5;
-		$llimit;
+		$movie = new ffmpeg_movie($videoPath.$filehash.".".$format, false);
+		$duration = $movie->getDuration();
+		$limit = 4;
 		
 		//((4mb*1024)/sekunden)*8
-		// -> 
-		$llimit = $_COOKIE['limit'];
-		if($llimit == 0){
-			$llimmit = 4;
+		$limit = $_COOKIE['limit'];
+		if($limit == 0){
+			$limit = 4;
 		}
 		if($duration > 120){
 			$duration = 120;
 		}
-		if($llimit == 4){
+		if($limit == 4){
 			$bitrate = (4096/$duration)*8;
 			$bitrate = $bitrate."k";
 		} else {
-			$bitrate = (($llimit*1024)/$duration)*8;
+			$bitrate = (($limit*1024)/$duration)*8;
 			$bitrate = $bitrate."k";
 		}
+		
+		// das scalen läuft noch nicht wie es sollte 
+		// runden ist scheisse...
+		
 		$px = $movie->getFrameHeight();
 		$py = $movie->getFrameWidth();
-		
-		// WICHTIG: Hier muss richtig gescalt werden
-		// d.h nicht mit geteilt arbeiten
-		// irgendwie kommt die ffmpeg version mit px:-1 nicht klar
+					
 		if($duration > 30){
 			if($duration < 60){
 				if(($px > 490) AND ($px < 800)){
@@ -284,35 +295,26 @@ if($boo){
 		$px = round($px);
 		$py = round($py);
 		$rsize = $py."x".$px;
-		$webm = explode(".", $namehash)[0].".webm";
-		$webm2 = "/var/www/videos/".$webm;
-		$max_size = $llimit;
+		$webm = explode(".", $filehash)[0].".webm";
+		$max_size = $limit;
 		$max_size = $max_size*8192;
-		$durationURL = "duration.php?id=".$randomOut;
+		$durationURL = "duration.php?id=".$randomTitle;
 		} else {
-			$webm = $namehash.".webm";
+			$webm = $filehash.".webm";
 		}
 		
-		$path = "/videos/".$webm;
-		$path2 = "/videos/".$namehash.".".$format;
+		$url = "http://pr0verter.de/videos/".$randomTitle.".webm";
 		
-		
-
-		
-		$url = "http://pr0verter.de/videos/".$webm;
-		$url2 = "http://pr0verter.de/videos/".$namehash.".".$format;
+		// der ganze script teil soll weg und es soll auf eine neue seite geleitet werden
 		?>
 		<script>
-
 		function move() {
 		  var elem = document.getElementById("myBar");   
 		  var width = 0;
 		  var id = setInterval(frame, 2000);
 		  function frame() {
 			if (width >= 100) {
-				// hier kommt noch ne extra seite hin
-				// also es wird z.b an pr0verter.de/beta/id.php?asdfasdf
-				// weitergeleitet, dort wird dann das video angezeigt
+				
 				var child = document.getElementById("myProgress");
 				child.parentNode.removeChild(child);
 				
@@ -330,11 +332,10 @@ if($boo){
 				vid.controls = true;
 				document.body.appendChild(vid);
 				
-				// ultra hässlich
-				var txt1 = "<a href='/videos/<?php echo $namehash.'.webm'; ?>' download>Download</a>";   
+				var txt1 = "<a href='/videos/<?php echo $randomTitle.'.webm'; ?>' download>Download</a>";   
 				$("body").append(txt1); 
 				
-				var txt2 = "<p>Link zum kopieren: http://pr0verter.de/videos/<?php echo $namehash.'.webm'; ?> </p>"; 
+				var txt2 = "<p>Link zum kopieren: http://pr0verter.de/videos/<?php echo $randomTitle.'.webm'; ?> </p>"; 
 				$("body").append(txt2); 
 				
 				clearInterval(id);
@@ -356,44 +357,21 @@ $(document).ready(function(){
 });
 </script>
 <?php
-		$log1 = "/var/www/logs/".$namehash."1.txt";
-		$log2 = "/var/www/logs/".$namehash."2.txt";
+
+		$log1 = "/var/www/logs/".$filehash."1.txt";
+		$log2 = "/var/www/logs/".$filehash."2.txt";
 		
-		$passlog1 = "/var/www/logs/".$namehash;
-		$passlog2 = "/var/www/logs/".$namehash;
-		// old : shell_exec( "ffmpeg -i /var/www/videos/$namehash.$format -vcodec libvpx -b $bitrate -minrate $bitrate -maxrate $bitrate -bufsize $bitrate -qmin 0 -qmax 54 -an -t 120 -s $rsize -threads 4 -fs $max_size /var/www/videos/$webm" . "> /dev/null 2>/dev/null &" );
+		$passlog1 = "/var/www/logs/".$filehash;
+		$passlog2 = "/var/www/logs/".$filehash;
+		// old : shell_exec( "ffmpeg -i /var/www/videos/$filehash.$format -vcodec libvpx -b $bitrate -minrate $bitrate -maxrate $bitrate -bufsize $bitrate -qmin 0 -qmax 54 -an -t 120 -s $rsize -threads 4 -fs $max_size /var/www/videos/$webm" . "> /dev/null 2>/dev/null &" );
 		
-		
-		// sollte eigentlich einen prozess im hintergrund starten, funktioniert so halb wegs
-		// alternative wäre gern willkommen
-		$cmd = "ffmpeg -y -i /var/www/videos/$namehash.$format -vb $bitrate -minrate $bitrate -maxrate $bitrate -s $rsize -an -t 120 -passlogfile $passlog1 -pass 1 /var/www/videos/$webm 1> $log1 2>&1 && ffmpeg -y -i /var/www/videos/$namehash.$format -vb $bitrate -minrate $bitrate -maxrate $bitrate -s $rsize -an -t 120 -passlogfile $passlog2 -pass 2 /var/www/videos/$webm 1> $log2 2>&1";
-		$outputfile = "/var/www/logs/".$namehash."outputfile";
-		$pidfile = "/var/www/logs/".$namehash."pidfile";
+		$cmd = "ffmpeg -y -i /var/www/videos/$filehash.$format -vb $bitrate -minrate $bitrate -maxrate $bitrate -s $rsize -an -t 120 -passlogfile $passlog1 -pass 1 /var/www/videos/$webm 1> $log1 2>&1 && ffmpeg -y -i /var/www/videos/$filehash.$format -vb $bitrate -minrate $bitrate -maxrate $bitrate -s $rsize -an -t 120 -passlogfile $passlog2 -pass 2 /var/www/videos/$webm 1> $log2 2>&1";
+		$outputfile = "/var/www/logs/".$randomTitle."outputfile";
+		$pidfile = "/var/www/logs/".$filehash."pidfile";
+		// don't touch a running system...
+		// wenn jemand ne alternative für den scheiss hat, immer her damit
 		exec(sprintf("%s > %s 2>&1 & echo $! >> %s", $cmd, $outputfile, $pidfile));
-		
-		// früher hab ich mal die dateien auf einem anderen server abgespeichert (s.pr0verter.de)
-		// noez.de hat leider wegen zu hohem traffic den server gelöscht und die preise erhöht
-		// danach hatte ich kein bock mehr auf den scheiss
-		//$ch = curl_init("http://s.pr0verter.de/save.php?pass=VRd9O4l6bPCg4edu&dl=http://31.214.243.205".$path);
-		//curl_setopt($ch, CURLOPT_NOBODY, true);
-		//curl_exec($ch);
-		//$retcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		// $retcode >= 400 -> not found, $retcode = 200, found.
-		//curl_close($ch);
-		
-		//$ch1 = curl_init("http://s.pr0verter.de/save.php?pass=VRd9O4l6bPCg4edu&dl=http://31.214.243.205".$path2);
-		//curl_setopt($ch1, CURLOPT_NOBODY, true);
-		//curl_exec($ch1);
-		//$retcode = curl_getinfo($ch1, CURLINFO_HTTP_CODE);
-		// $retcode >= 400 -> not found, $retcode = 200, found.
-		//curl_close($ch1);
 					
-		
-		
-		
-		
-		
-		
 	} else {
 		echo "<script>
 			alert('Du kannst nur jede minute ein Video konvertieren :/');
