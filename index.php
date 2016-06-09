@@ -51,7 +51,7 @@ if($isExisting){
 		<input type="file" name="datei" id="fileupload">
 		</form>
 		<p>ODER remote Upload</p>
-		<form action="upload.php" name="remoteUpload" id="remoteUpload" method="get" enctype="multipart/form-data">
+		<form action="upload.php" name="remoteUpload2" id="remoteUpload2" method="get" enctype="multipart/form-data">
 		<input type="text" size=30 name="remote_upload" id="remoteUpload" placeholder="z.B http://i.imgur.com/mGtnm6U.webm">
 		</form>
 		<br>
@@ -60,17 +60,15 @@ if($isExisting){
 		<script>
 			function cphp(){
 				var remote = document.getElementById("remoteUpload").value;
-				var browser = document.getElementById("browserUpload").value;
+				var browser = document.getElementById("fileupload").value;
 				var isSelected = false;
 				
-				if(new String(remote).valueOf() != new String("undefined").valueOf()){
-					alert(remote);
-					document.remoteUpload.submit();
+				if(new String(remote).valueOf() != new String("").valueOf()){
+					document.remoteUpload2.submit();
 					isSelected = true;
 				}
-				if(new String(browser).valueOf() != new String("undefined").valueOf()){
+				if(new String(browser).valueOf() != new String("").valueOf()){
 					if(isSelected != true){
-						alert(2);
 						document.browserUpload.submit();
 						isSelected = true;
 					}
