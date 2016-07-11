@@ -1,0 +1,11 @@
+{
+    "name": "pr0verter",
+    "description": "Pr0verter",
+    "require": {
+        "mikecao/flight": "^1.2",
+        "smarty/smarty": "^3.1",
+        "matthiasmullie/minify": "^1.3",
+        "cloudconvert/cloudconvert-php": "dev-master",
+        "james-heinrich/getid3": "^1.9"
+    }
+}
