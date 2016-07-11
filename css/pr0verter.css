@@ -1,7 +1,21 @@
-body{
-    color: #f2f5f4;
-    background-color: #161618;
-    font-size: 2em;
+.example {
+    display             : -webkit-box;
+    display             : -ms-flexbox;
+    display             : flex;
+    -webkit-transition  : all .5s;
+    transition          : all .5s;
+    -webkit-user-select : none;
+    -moz-user-select    : none;
+    -ms-user-select     : none;
+    user-select         : none;
+    background          : -webkit-linear-gradient(top, white, black);
+    background          : linear-gradient(to bottom, white, black);
+}
+
+body {
+    color            : #F2F5F4;
+    background-color : #161618;
+    font-size        : 2em;
 }
 input {
     color: black;
