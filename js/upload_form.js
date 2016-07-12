@@ -1,8 +1,6 @@
 $(function () {
     var bar = $('#upload_bar');
     var status = $('#status');
-    
-    
 
     $('#upload_form').ajaxForm({
         beforeSend: function () {
@@ -33,4 +31,4 @@ $(function () {
             status.html(xhr.responseText);
         }
     });
-}); 
+});
