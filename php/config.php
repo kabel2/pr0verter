@@ -7,7 +7,6 @@
 	define( 'DB_DATABASE', '' );
 
 // Verzeichnisse der Webseite
-	define( 'DIRECTORY', __DIR__ );
 	define( 'CLASSES', DIRECTORY . '/classes/' );
 	define( 'PHP', DIRECTORY . '/php/' );
 	define( 'CSS', DIRECTORY . '/css/' );

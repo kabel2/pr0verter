@@ -1,9 +1,9 @@
 <?php
-	error_reporting( E_ALL ); // @todo for debugging porpuse?
 	use MatthiasMullie\Minify;
-
-	require __DIR__ . '/vendor/autoload.php';
-	require __DIR__ . '/php/config.php';
+        
+        define('DIRECTORY', __DIR__);
+	require 'vendor/autoload.php';
+	require 'php/config.php';
 
 	$css = new Minify\CSS();
 	$css->add( CSS . 'bootstrap/bootstrap.min.css' );
