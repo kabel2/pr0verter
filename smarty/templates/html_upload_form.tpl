@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
             <center><h1>Pr0verter</h1> </center>
-            Der Pr0verter wandelt deine Videos ins WebM Format um.<br>
+            Der Pr0verter wandelt deine Videos ins Mp4 Format um.<br>
             Videos dürfen max. 50MB groß sein. Videos, die länger als 120 Sekunden sind, werden gekürzt.<br>
             Das Konvertieren kann je nach Videolänge bis zu 10 Minuten dauern, also Geduld. ¯\_(ツ)_/¯<br><br>
             <form action="{$base_url}upload" method="POST" id="upload_form" enctype="multipart/form-data">

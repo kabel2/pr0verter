@@ -18,7 +18,6 @@
 	define( 'TITLE', 'Pr0verter' );
 	define( 'BASE_URL', '' );
 	define( 'TIME_TO_WAIT', 20 );
-	define( 'API_KEY', '' );
 	define( 'DOWNLOAD_PATH', '' );
 	define( 'LOG_PATH', '' );
 

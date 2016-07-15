@@ -1,6 +1,5 @@
 <?php
 	use MatthiasMullie\Minify;
-        
         define('DIRECTORY', __DIR__);
 	require 'vendor/autoload.php';
 	require 'php/config.php';
@@ -126,7 +125,7 @@
 	} );
 
 	Flight::route( '/show/@file', function( $file ) {
-		if( file_exists( DOWNLOAD_PATH . $file . '.webm' ) ) {
+		if( file_exists( DOWNLOAD_PATH . $file . '.mp4' ) ) {
 			Flight::view()
 			      ->assign( 'title', TITLE );
 			Flight::view()
@@ -147,11 +146,11 @@
 	} );
 
 	Flight::route( '/download/@file', function( $file ) {
-		if( file_exists( DOWNLOAD_PATH . $file . '.webm' ) ) {
+		if( file_exists( DOWNLOAD_PATH . $file . '.mp4' ) ) {
 			header( 'Content-type: video' );
-			header( 'Content-Disposition: attachment; filename="' . basename( $file . '.webm' ) . '"' );
+			header( 'Content-Disposition: attachment; filename="' . basename( $file . '.mp4' ) . '"' );
 			header( 'Content-Transfer-Encoding: binary' );
-			readfile( DOWNLOAD_PATH . $file . '.webm' );
+			readfile( DOWNLOAD_PATH . $file . '.mp4' );
 		} else {
 			Flight::redirect( '/' );
 		}
