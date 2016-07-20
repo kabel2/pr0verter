@@ -33,11 +33,10 @@
                     $('#bar').width(data + '%').html(data + '%');
                     if (data === '100') {
                         document.location.href = '{/literal}{$base_url}{literal}show/{/literal}{$file_name}{literal}';
-                                            }
-                                        }
-                                    });
-                                }
-
-                            });
+                    }
+                }
+            });
+        }
+    });
     {/literal}
 </script>
