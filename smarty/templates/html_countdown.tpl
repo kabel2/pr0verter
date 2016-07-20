@@ -21,14 +21,12 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-6 col-md-offset-3">
-            <center>
-                <h1>Pr0verter</h1>
-                <br><br>
-                <h2>du musst warten ...</h2>
-                <br><br>
-                <h3 id="timer"></h3>
-            </center>
+        <div class="col-md-6 col-md-offset-3 text-center">
+            <h1>Pr0verter</h1>
+            <br><br>
+            <h2>du musst warten ...</h2>
+            <br><br>
+            <h3 id="timer"></h3>
         </div>
     </div>
 </div>
