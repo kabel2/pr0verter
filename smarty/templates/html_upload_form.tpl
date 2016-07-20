@@ -39,6 +39,10 @@
                 <hr>
                 <br>
                 <center><input class="btn btn-danger" type="submit" value="Konvertieren"></center>
+                <br>
+                <br>
+                Kontakt: pr0verter@gmail.com
+                <br>
             </form>
         </div>
     </div>
