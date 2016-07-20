@@ -16,7 +16,4 @@
 
         <link href="{$base_url}css/main.min.css" rel="stylesheet">
         <script src="{$base_url}js/main.min.js"></script>
-        <style type="text/css">
-            
-        </style>
     </head>
