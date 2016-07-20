@@ -9,7 +9,7 @@
 
 	Flight::map( 'render', function( $template, $data ) {
 		Flight::view()
-		      ->assign( $data );
+		      ->assgn( $data );
 		Flight::view()
 		      ->display( $template );
 	} );
@@ -47,7 +47,7 @@
 
 	Flight::map( 'is_user_allowed', function() {
 		$user_ip   = md5( Flight::request()->ip );
-		$user_data = Flight::select( 'pr0verter', '*', 'tstamp = ' . "'" . $user_ip . "'", 1 );
+		$user_data = Flight::select( 'pr0verter', '*', 'tstamp = ' . "'" . $user_ip . "'", 1);
 		if( count( $user_data ) <= 0 ) {
 			$data[ 'tstamp' ]   = $user_ip;
 			$data[ 'datetime' ] = 0;
@@ -65,7 +65,7 @@
 
 	Flight::map( 'set_user_time', function() {
 		$user_ip            = md5( Flight::request()->ip );
-		$user_data          = Flight::select( 'pr0verter', '*', 'tstamp = ' . "'" . $user_ip . "'", 1 );
+		$user_data          = Flight::select( 'pr0verter', '*', 'tstamp = ' . "'" . $user_ip . "'", 1);
 		$data[ 'datetime' ] = time();
 		Flight::update( 'pr0verter', $user_data[ 0 ][ 'id' ], $data );
 	} );
@@ -92,7 +92,7 @@
 	} );
 
 	Flight::map( 'is_supported', function( $format ) {
-		$supportedTypes = [ 'webm', 'mp4', 'mkv', 'mov', 'avi', 'wmv', 'flv', '3gp', 'gif' ];
+		$supportedTypes = [ 'webm', 'mp4', 'mkv', 'mov', 'avi', 'wmv', 'flv', '3gp', 'gif', 'gifv' ];
 		foreach( $supportedTypes as $type ) {
 			if(strcasecmp($type, $format) == 0) {
 				return TRUE;
@@ -103,6 +103,7 @@
 	} );
 
 	Flight::map( 'download', function( $url, $save_to ) {
+                
 		$ch = curl_init();
 		curl_setopt( $ch, CURLOPT_POST, 0 );
 		curl_setopt( $ch, CURLOPT_URL, $url );
@@ -123,10 +124,7 @@
 
 	} );
         
-        define('DEFAULT_MB', 4);
-        define('MAX_DURATION_IN_SEC', 119.6); // ffmpeg cuts not exactly on 2 min
-        define('BITS_IN_KILOBYTE', 1024 * 8);
-        define('AUDIO_BITRATE', 130);
+        
         
 	Flight::map( 'get_bitrate', function( $duration, $limit, $sound ) {
 		
@@ -149,22 +147,34 @@
 			if( $duration < 60 ) {
 				if( ( $px > 490 ) AND ( $px < 800 ) ) {
 					$py /= 1.5;
+                                        $px /= 1.5;
 				}
 				if( $px > 800 ) {
 					$py /= 2;
+                                        $px /= 2;
 				}
 			}
 			if( $duration > 60 ) {
 				if( ( $px > 450 ) AND ( $px < 800 ) ) {
 					$py /= 2;
+                                        $px /= 2;
 				}
 				if( $px > 800 ) {
 					$py /= 2.7;
+                                        $px /= 2.7;
 				}
 			}
 		}
-
-		return round( $py );
+		$py = round($py);
+                $px = round($px);
+                // resolution has to be even
+                if ($py % 2 != 0) {
+                    $py++;
+                }
+                if ($px % 2 != 0) {
+                    $px++;
+                }
+                return $py . 'x' . ($px);
 	} );
 
 	Flight::map( 'resize', function( $random_name, $format, $bitrate, $max_size, $resolution, $sound ) {
@@ -176,14 +186,14 @@
 			$logfile = DOWNLOAD_PATH . $random_name;
 
 
-			shell_exec( 'ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -vb ' . $bitrate . ' -vf scale=' . $resolution . ':-1 -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 1 -strict -2 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' 2>' . $log1 . ' && ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -vb ' . $bitrate . ' -vf scale=' . $resolution . ':-1 -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 2 -strict -2 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' > /dev/null 2>' . $log2 . ' &' );
+			shell_exec( 'ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -vb ' . $bitrate . ' -s ' . $resolution . ' -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 1 -strict -2 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' 2>' . $log1 . ' && ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -vb ' . $bitrate . ' -s ' . $resolution . ' -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 2 -strict -2 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' > /dev/null 2>' . $log2 . ' &' );
 
 		} else {
 
 			$log1    = DOWNLOAD_PATH . $random_name . '.log1';
 			$log2    = DOWNLOAD_PATH . $random_name . '.log';
 			$logfile = DOWNLOAD_PATH . $random_name;
-			shell_exec( 'ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -an -vb ' . $bitrate . ' -vf scale=' . $resolution . ':-1 -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 1 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' 2>' . $log1 . ' && ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -an -vb ' . $bitrate . ' -vf scale=' . $resolution . ':-1 -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 2 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' > /dev/null 2>' . $log2 . ' &' );
+			shell_exec( 'ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -an -vb ' . $bitrate . ' -s ' . $resolution . ' -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 1 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' 2>' . $log1 . ' && ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -an -vb ' . $bitrate . ' -s ' . $resolution . ' -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 2 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' > /dev/null 2>' . $log2 . ' &' );
 		}
 	} );
 
@@ -229,3 +239,19 @@
 
 		}
 	} );
+        
+        Flight::map( 'parse_url', function( $url, $format ) {
+            // add yt downloader?
+            if(strcasecmp($format, 'gifv') == 0){
+                return preg_replace('gifv', 'mp4', $url);
+            }
+            return $url;
+        } );
+        
+        Flight::map( 'parse_format', function( $url, $format ) {
+            // $url wird später gebraucht um das format zu bekommen 
+            if(strcasecmp($format, 'gifv') == 0){
+                return 'mp4';
+            }
+            return $format;
+        } );
