@@ -169,6 +169,8 @@
 				$max_size    = $limit * 8192;
 				if( $url !== '' ) {
 					$format = substr( $url, strrpos( $url, '.' ) + 1 );
+                                        $url = Flight::parse_url($url, $format);
+                                        $format = Flight::parse_format($url, $format);
 					if( Flight::get_url_file_size( $url ) < 52428800 ) {
 						if( Flight::is_supported( $format ) ) {
 							Flight::download( $url, DOWNLOAD_PATH . $random_name . '.' . $format );
@@ -183,7 +185,6 @@
 					$format = pathinfo( Flight::request()->files->file[ 'name' ], PATHINFO_EXTENSION );
 					if( Flight::is_supported( $format ) ) {
 						if( Flight::request()->files->file[ 'size' ] < 52428800 ) {
-							print_r( Flight::request()->files ); // @todo forgotten debug statement ?
 							if( move_uploaded_file( Flight::request()->files->file[ 'tmp_name' ], DOWNLOAD_PATH . $random_name . '.' . $format ) ) {
 								Flight::convert( $random_name, $format, $max_size, $limit, $sound );
 							} else {
@@ -210,7 +211,7 @@
 			Flight::redirect( '/' );
 		} else {
 			$user_ip   = md5( Flight::request()->ip );
-			$user_data = Flight::select( 'pr0verter', '*', 'tstamp = ' . "'" . $user_ip . "'", 1 );
+			$user_data = Flight::select( 'pr0verter', '*', 'tstamp = ' . "'" . $user_ip . "'", 1);
 			$wait_time = TIME_TO_WAIT - ( time() - $user_data[ 0 ][ 'datetime' ] );
 			Flight::view()
 			      ->assign( 'title', TITLE );
