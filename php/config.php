@@ -20,6 +20,11 @@
 	define( 'TIME_TO_WAIT', 20 );
 	define( 'DOWNLOAD_PATH', '' );
 	define( 'LOG_PATH', '' );
+        
+        define('DEFAULT_MB', 4);
+        define('MAX_DURATION_IN_SEC', 119.6); // ffmpeg cuts not exactly on 2 min
+        define('BITS_IN_KILOBYTE', 1024 * 8);
+        define('AUDIO_BITRATE', 130);
 
 
 	require( PHP . 'class_loader.php' );
