@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-6 col-md-offset-3">
-            <center><h1>Pr0verter</h1> </center>
+        <div class="col-md-6 col-md-offset-3 text-center">
+            <h1>Pr0verter</h1>
             Der Pr0verter wandelt deine Videos ins Mp4 Format um.<br>
             Videos dürfen max. 50MB groß sein. Videos, die länger als 120 Sekunden sind, werden gekürzt.<br>
             Das Konvertieren kann je nach Videolänge bis zu 10 Minuten dauern, also Geduld. ¯\_(ツ)_/¯<br><br>
@@ -14,7 +14,7 @@
                     </label>
                 </div>
                 <br>
-                <h3>ODER remote Upload</h3>
+                <h3>ODER URL ANGEBEN</h3>
                 <br>
                 <div class="form-group">
                     <h2>URL:</h2>
@@ -38,7 +38,7 @@
                 </div>
                 <hr>
                 <br>
-                <center><input class="btn btn-danger" type="submit" value="Konvertieren"></center>
+                <input class="btn btn-danger" type="submit" value="Konvertieren">
                 <br>
                 <br>
                 Kontakt: pr0verter@gmail.com
@@ -50,8 +50,8 @@
 
 <div class="container-fluid" id="full">
     <div class="row">
-        <div class="col-md-6 col-md-offset-3" id="progress">
-            <center> <h2>lade hoch ...</h2></center>
+        <div class="col-md-6 col-md-offset-3 text-center" id="progress">
+            <h2>lade hoch ...</h2>
             <br>
             <div class="progress">
                 <div id="upload_bar" class="progress-bar progress-bar-danger progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0;">

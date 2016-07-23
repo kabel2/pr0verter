@@ -1,9 +1,9 @@
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-6 col-md-offset-3">
-            <center><h1>Pr0verter</h1></center>
+        <div class="col-md-6 col-md-offset-3 text-center">
+            <h1>Pr0verter</h1>
             <br><br>
-            <center><h2>konvertiere</h2></center>
+            <h2>konvertiere</h2>
             <br><br>
             <div class="progress">
                 <div id="bar" class="progress-bar progress-bar-danger progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0;">
@@ -33,11 +33,10 @@
                     $('#bar').width(data + '%').html(data + '%');
                     if (data === '100') {
                         document.location.href = '{/literal}{$base_url}{literal}show/{/literal}{$file_name}{literal}';
-                                            }
-                                        }
-                                    });
-                                }
-
-                            });
+                    }
+                }
+            });
+        }
+    });
     {/literal}
 </script>
