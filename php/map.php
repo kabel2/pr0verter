@@ -9,7 +9,7 @@
 
 	Flight::map( 'render', function( $template, $data ) {
 		Flight::view()
-		      ->assgn( $data );
+		      ->assign( $data );
 		Flight::view()
 		      ->display( $template );
 	} );
