@@ -178,10 +178,8 @@
 	} );
 
 	Flight::map( 'resize', function( $random_name, $format, $bitrate, $max_size, $resolution, $sound, $autoResolution ) {
-            file_put_contents('/var/www/html/beta/data/test.txt', " 0", FILE_APPEND);
 		exec( 'mv ' . DOWNLOAD_PATH . $random_name . '.' . $format . ' ' . DOWNLOAD_PATH . $random_name . '.source.' . $format );
                 $max_size = (($max_size/8192)*1047576);
-                file_put_contents('/var/www/html/beta/data/test.txt', " a", FILE_APPEND);
                 $log1    = DOWNLOAD_PATH . $random_name . '.log1';
                 $log2    = DOWNLOAD_PATH . $random_name . '.log';
 		$logfile = DOWNLOAD_PATH . $random_name;
@@ -189,23 +187,18 @@
                 $firstPass =  ' -vb ' . $bitrate . ' -preset fast -t 179 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 1 ';
                 $secondPass = ' -fs '.$max_size .' -vb ' . $bitrate . ' -preset fast -t 179 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 2 ';
                 
-                file_put_contents('/var/www/html/beta/data/test.txt', "Firstpass: " . $firstPass . " SecondPass: " . $secondPass, FILE_APPEND);
-		if( $sound === 'on' ) {
+                if( $sound === 'on' ) {
 			$firstPass = $firstPass . " -c:a aac -b:a 120k -strict -2 ";
                         $secondPass = $secondPass . " -c:a aac -b:a 120k -strict -2 ";
-                        file_put_contents('/var/www/html/beta/data/test.txt', " 2", FILE_APPEND);
 		} else {
 			$firstPass = $firstPass . " -an";
                         $secondPass = $secondPass . " -an";
                         
 		}
-                file_put_contents('/var/www/html/beta/data/test.txt', " 3: " . $autoResolution, FILE_APPEND);
                 if($autoResolution !== 'on'){
                     $firstPass = $firstPass . ' -s ' . $resolution . ' ';
                     $secondPass = $secondPass . ' -s ' . $resolution . ' ';
-                    file_put_contents('/var/www/html/beta/data/test.txt', " 4", FILE_APPEND);
                 } 
-                file_put_contents('/var/www/html/beta/data/test.txt', " 5", FILE_APPEND);
                 shell_exec( '/./home/ffmpeg/ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . $firstPass . DOWNLOAD_PATH . $random_name . '.mp4' . ' 2>' . $log1 . ' && /./home/ffmpeg/ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . $secondPass . DOWNLOAD_PATH . $random_name . '.mp4' . ' > /dev/null 2>' . $log2 . ' &' );
 	} );
 

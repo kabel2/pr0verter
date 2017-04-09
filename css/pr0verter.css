@@ -12,6 +12,16 @@
     background          : linear-gradient(to bottom, white, black);
 }
 
+.navbar .navbar-nav {
+  display: inline-block;
+  float: none;
+  vertical-align: top;
+}
+
+.navbar .navbar-collapse {
+  text-align: center;
+}
+
 body {
     color            : #F2F5F4;
     background-color : #161618;
@@ -65,3 +75,5 @@ h1{
     background-color: #161618;
     font-size: 2em;
 }
+
+
