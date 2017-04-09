@@ -64,6 +64,10 @@
 					if( strpos( $file, 'muxing overhead' ) !== FALSE ) {
 						echo 100;
 					} else {
+                                                if(strpos($file, 'Conversion failed') !== FALSE){
+                                                    echo 420;
+                                                    return;
+                                                }
 						preg_match_all( '/time=(.*?) bitrate/', $file, $last_convert_time );
 						$last_convert_time = array_pop( $last_convert_time );
 						if( is_array( $last_convert_time ) ) {
@@ -157,22 +161,24 @@
 	} );
 
 	Flight::route( '/upload', function() {
+		
 		DB::init( DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE );
 		if( Flight::is_user_allowed() ) {
 			$file  = Flight::request()->data->file;
 			$url   = Flight::request()->data->url;
 			$limit = Flight::request()->data->limit;
 			$sound = Flight::request()->data->sound;
+                        $autoResolution = Flight::request()->data->autoResolution;
 
 			if( $limit > 0 && $limit <= 30 ) {
 				$random_name = Flight::random_string();
 				$max_size    = $limit * 8192;
 				if( $url !== '' ) {
 					$format = substr( $url, strrpos( $url, '.' ) + 1 );
-					if( Flight::get_url_file_size( $url ) < 52428800 ) {
+					if( Flight::get_url_file_size( $url ) < 104857600 ) {
 						if( Flight::is_supported( $format ) ) {
 							Flight::download( $url, DOWNLOAD_PATH . $random_name . '.' . $format );
-							Flight::convert( $random_name, $format, $max_size, $limit, $sound );
+							Flight::convert( $random_name, $format, $max_size, $limit, $sound, $autoResolution );
 						} else {
 							Flight::redirect( '/error' );
 						}
@@ -182,10 +188,12 @@
 				} elseif( $file !== '' ) {
 					$format = pathinfo( Flight::request()->files->file[ 'name' ], PATHINFO_EXTENSION );
 					if( Flight::is_supported( $format ) ) {
-						if( Flight::request()->files->file[ 'size' ] < 52428800 ) {
-							print_r( Flight::request()->files ); // @todo forgotten debug statement ?
+						if( Flight::request()->files->file[ 'size' ] < 104857600 ) {
+							
 							if( move_uploaded_file( Flight::request()->files->file[ 'tmp_name' ], DOWNLOAD_PATH . $random_name . '.' . $format ) ) {
-								Flight::convert( $random_name, $format, $max_size, $limit, $sound );
+								
+								Flight::convert( $random_name, $format, $max_size, $limit, $sound, $autoResolution );
+								
 							} else {
 								Flight::redirect( '/error' );
 							}
@@ -203,6 +211,51 @@
 			Flight::redirect( '/nope' );
 		}
 	} );
+        
+        Flight::route( '/help', function(){
+            Flight::view()
+			      ->assign( 'title', TITLE );
+			Flight::view()
+			      ->assign( 'base_url', BASE_URL );
+			Flight::view()
+			      ->display( 'html_header.tpl' );
+			Flight::view()
+			      ->assign( 'base_url', BASE_URL );
+			Flight::view()
+			      ->display( 'html_help.tpl' );
+			Flight::view()
+			      ->display( 'html_footer.tpl' );
+        });
+        
+        Flight::route( '/contact', function(){
+            Flight::view()
+			      ->assign( 'title', TITLE );
+			Flight::view()
+			      ->assign( 'base_url', BASE_URL );
+			Flight::view()
+			      ->display( 'html_header.tpl' );
+			Flight::view()
+			      ->assign( 'base_url', BASE_URL );
+			Flight::view()
+			      ->display( 'html_contact.tpl' );
+			Flight::view()
+			      ->display( 'html_footer.tpl' );
+        });
+        
+        Flight::route( '/support', function(){
+            Flight::view()
+			      ->assign( 'title', TITLE );
+			Flight::view()
+			      ->assign( 'base_url', BASE_URL );
+			Flight::view()
+			      ->display( 'html_header.tpl' );
+			Flight::view()
+			      ->assign( 'base_url', BASE_URL );
+			Flight::view()
+			      ->display( 'html_support.tpl' );
+			Flight::view()
+			      ->display( 'html_footer.tpl' );
+        });
 
 	Flight::route( '/nope', function() {
 		DB::init( DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE );

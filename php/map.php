@@ -177,35 +177,48 @@
                 return $py . 'x' . ($px);
 	} );
 
-	Flight::map( 'resize', function( $random_name, $format, $bitrate, $max_size, $resolution, $sound ) {
+	Flight::map( 'resize', function( $random_name, $format, $bitrate, $max_size, $resolution, $sound, $autoResolution ) {
+            file_put_contents('/var/www/html/beta/data/test.txt', " 0", FILE_APPEND);
 		exec( 'mv ' . DOWNLOAD_PATH . $random_name . '.' . $format . ' ' . DOWNLOAD_PATH . $random_name . '.source.' . $format );
-
+                $max_size = (($max_size/8192)*1047576);
+                file_put_contents('/var/www/html/beta/data/test.txt', " a", FILE_APPEND);
+                $log1    = DOWNLOAD_PATH . $random_name . '.log1';
+                $log2    = DOWNLOAD_PATH . $random_name . '.log';
+		$logfile = DOWNLOAD_PATH . $random_name;
+                
+                $firstPass =  ' -vb ' . $bitrate . ' -preset fast -t 179 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 1 ';
+                $secondPass = ' -fs '.$max_size .' -vb ' . $bitrate . ' -preset fast -t 179 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 2 ';
+                
+                file_put_contents('/var/www/html/beta/data/test.txt', "Firstpass: " . $firstPass . " SecondPass: " . $secondPass, FILE_APPEND);
 		if( $sound === 'on' ) {
-			$log1    = DOWNLOAD_PATH . $random_name . '.log1';
-			$log2    = DOWNLOAD_PATH . $random_name . '.log';
-			$logfile = DOWNLOAD_PATH . $random_name;
-
-
-			shell_exec( 'ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -vb ' . $bitrate . ' -s ' . $resolution . ' -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 1 -strict -2 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' 2>' . $log1 . ' && ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -vb ' . $bitrate . ' -s ' . $resolution . ' -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 2 -strict -2 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' > /dev/null 2>' . $log2 . ' &' );
-
+			$firstPass = $firstPass . " -c:a aac -b:a 120k -strict -2 ";
+                        $secondPass = $secondPass . " -c:a aac -b:a 120k -strict -2 ";
+                        file_put_contents('/var/www/html/beta/data/test.txt', " 2", FILE_APPEND);
 		} else {
-
-			$log1    = DOWNLOAD_PATH . $random_name . '.log1';
-			$log2    = DOWNLOAD_PATH . $random_name . '.log';
-			$logfile = DOWNLOAD_PATH . $random_name;
-			shell_exec( 'ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -an -vb ' . $bitrate . ' -s ' . $resolution . ' -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 1 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' 2>' . $log1 . ' && ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . ' -an -vb ' . $bitrate . ' -s ' . $resolution . ' -t 120 -profile:v baseline -level 3.0 -passlogfile ' . $logfile . ' -pass 2 ' . DOWNLOAD_PATH . $random_name . '.mp4' . ' > /dev/null 2>' . $log2 . ' &' );
+			$firstPass = $firstPass . " -an";
+                        $secondPass = $secondPass . " -an";
+                        
 		}
+                file_put_contents('/var/www/html/beta/data/test.txt', " 3: " . $autoResolution, FILE_APPEND);
+                if($autoResolution !== 'on'){
+                    $firstPass = $firstPass . ' -s ' . $resolution . ' ';
+                    $secondPass = $secondPass . ' -s ' . $resolution . ' ';
+                    file_put_contents('/var/www/html/beta/data/test.txt', " 4", FILE_APPEND);
+                } 
+                file_put_contents('/var/www/html/beta/data/test.txt', " 5", FILE_APPEND);
+                shell_exec( '/./home/ffmpeg/ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . $firstPass . DOWNLOAD_PATH . $random_name . '.mp4' . ' 2>' . $log1 . ' && /./home/ffmpeg/ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.source.' . $format . $secondPass . DOWNLOAD_PATH . $random_name . '.mp4' . ' > /dev/null 2>' . $log2 . ' &' );
 	} );
 
 	Flight::map( 'go_to_status', function( $random_name, $format, $duration ) {
 		echo '' . '<form action="status" method="post" name="form">' . '<input type="hidden" name="random_name" value="' . $random_name . '" />' . '<input type="hidden" name="format" value="' . $format . '" />' . '<input type="hidden" name="duration" value="' . $duration . '" />' . '</form>' . '<script type="text/javascript">' . 'document.form.submit();' . '</script>';
 	} );
 
-        Flight::map( 'convert', function( $random_name, $format, $max_size, $limit, $sound ){
+        Flight::map( 'convert', function( $random_name, $format, $max_size, $limit, $sound, $autoResolution ){
+            
                 if(strcasecmp($format, 'gif') == 0) {
                         // ID3 unterstützt das natürlich nicht..
                         // ffprobe auch nicht, ffmpeg codiert das video um die Dauer zu bekommen
-                        shell_exec( 'ffmpeg -i ' . DOWNLOAD_PATH . $random_name . '.gif' . ' -f null - 2>' . DOWNLOAD_PATH . $random_name . '.duration.log' );
+                        shell_exec( '/./home/ffmpeg/ffmpeg -i ' . DOWNLOAD_PATH . $random_name . '.gif' . ' -f null - 2>' . DOWNLOAD_PATH . $random_name . '.duration.log' );
                         // duration_string = hours:minutes:seconds.ms 
                         $duration_string = '';
                         // todo: regex so anpassen dass duration_string wirklich ein string ist... 
@@ -215,17 +228,18 @@
                         $bitrate = Flight::get_bitrate($duration, $limit, '');
                         Flight::set_user_time();
                         // baseline profile doesn't support 4:4:4, deshalb der "workaround" mit scale
-                        // baseline weil pr0 nur das unterstützt 
-                        shell_exec('ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.gif' . ' -vb ' . $bitrate . ' -an -t 120 -profile:v baseline -level 3.0 -vf scale=' . '"trunc(in_w/2)*2:trunc(in_h/2)*2"' . ' -pix_fmt yuv420p ' . DOWNLOAD_PATH . $random_name . '.mp4 2>' . DOWNLOAD_PATH . $random_name . '.log');
+                        // baseline weil pr0 nur das unterstützt
+                        shell_exec('/./home/ffmpeg/ffmpeg -y -i ' . DOWNLOAD_PATH . $random_name . '.gif' . ' -vb ' . $bitrate . ' -an -t 119 -profile:v baseline -level 3.0 -vf scale=' . '"trunc(in_w/2)*2:trunc(in_h/2)*2"' . ' -pix_fmt yuv420p ' . DOWNLOAD_PATH . $random_name . '.mp4 2>' . DOWNLOAD_PATH . $random_name . '.log');
                         Flight::go_to_status( $random_name, $format, $duration);
                 } elseif(strcasecmp($format, 'webm') == 0) {
 			$getID3     = new getID3;
 			$meta_data  = $getID3->analyze( DOWNLOAD_PATH . $random_name . '.' . $format );
-			$height     = explode( '=', exec( 'ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height ' . DOWNLOAD_PATH . $random_name . '.' . $format ) )[ 1 ];
-			$width      = explode( '=', exec( 'ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=width ' . DOWNLOAD_PATH . $random_name . '.' . $format ) )[ 1 ];
+			$height     = explode( '=', exec( '/./home/ffmpeg/ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height ' . DOWNLOAD_PATH . $random_name . '.' . $format ) )[ 1 ];
+			$width      = explode( '=', exec( '/./home/ffmpeg/ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=width ' . DOWNLOAD_PATH . $random_name . '.' . $format ) )[ 1 ];
 			$bitrate    = Flight::get_bitrate( $meta_data[ 'playtime_seconds' ], $limit, $sound );
 			$resolution = Flight::get_resolution( $height , $width , $meta_data[ 'playtime_seconds' ]);
-			Flight::resize( $random_name, $format, $bitrate, $max_size, $resolution, $sound );
+                        
+			Flight::resize( $random_name, $format, $bitrate, $max_size, $resolution, $sound, $autoResolution );
 			Flight::set_user_time();
 			Flight::go_to_status( $random_name, $format, $meta_data[ 'playtime_seconds' ] );
 		} else {
@@ -233,7 +247,7 @@
 			$meta_data  = $getID3->analyze( DOWNLOAD_PATH . $random_name . '.' . $format );
 			$bitrate    = Flight::get_bitrate( $meta_data[ 'playtime_seconds' ], $limit, $sound );
 			$resolution = Flight::get_resolution( $meta_data[ 'video' ][ 'resolution_y' ], $meta_data[ 'video' ][ 'resolution_x' ], $meta_data[ 'playtime_seconds' ] );
-			Flight::resize( $random_name, $format, $bitrate, $max_size, $resolution, $sound );
+			Flight::resize( $random_name, $format, $bitrate, $max_size, $resolution, $sound, $autoResolution );
 			Flight::set_user_time();
 			Flight::go_to_status( $random_name, $format, $meta_data[ 'playtime_seconds' ] );
 

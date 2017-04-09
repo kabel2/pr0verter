@@ -1,9 +1,10 @@
-<div class="container-fluid">
+<div class="container-fluid">  
     <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center">
+            
             <h1>Pr0verter</h1>
             Der Pr0verter wandelt deine Videos ins Mp4 Format um.<br>
-            Videos dürfen max. 50MB groß sein. Videos, die länger als 120 Sekunden sind, werden gekürzt.<br>
+            Videos dürfen max. 100MB groß sein. Videos, die länger als 180 Sekunden sind, werden gekürzt.<br>
             Das Konvertieren kann je nach Videolänge bis zu 10 Minuten dauern, also Geduld. ¯\_(ツ)_/¯<br><br>
             <form action="{$base_url}upload" method="POST" id="upload_form" enctype="multipart/form-data">
                 <hr>
@@ -26,7 +27,7 @@
                 <h2>Größe die das Video haben soll in MB:</h2>
                 <div class="input-group">
                     <div class="input-group-addon">1 - 30</div>
-                    <input type="number" id="limit" name="limit" min="1" max="30" value="4" class="form-control" />
+                    <input type="number" id="limit" name="limit" min="1" max="30" value="6" class="form-control" />
                     <div class="input-group-addon">MB</div>
                 </div>
                 <hr>
@@ -36,18 +37,24 @@
                         <input name="sound" type="checkbox"> JA!
                     </label>
                 </div>
+                <h2>Video Auflösung beibehalten:</h2>
+                <div class="checkbox">
+                    <label>
+                        <input name="autoResolution" type="checkbox"> JA!
+                    </label>
+                </div>
                 <hr>
                 <br>
                 <input class="btn btn-danger" type="submit" value="Konvertieren">
                 <br>
                 <br>
-                Kontakt: pr0verter@gmail.com
-                <br>
             </form>
+            <br>
         </div>
-    </div>
-</div>
 
+    </div>
+
+</div>
 <div class="container-fluid" id="full">
     <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center" id="progress">
@@ -63,3 +70,10 @@
 </div>
 
 <div id="status" style="display: none;"></div>
+
+
+
+
+
+
+

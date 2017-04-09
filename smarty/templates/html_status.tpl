@@ -15,28 +15,34 @@
 </div>
 <script type="text/javascript">
     {literal}
-    $(function () {
-        var interval = setInterval(get_progress, 1000);
-        function get_progress() {
-            var action = 'duration',
-                    method = 'POST',
-                    data = {duration: '{/literal}{$duration}{literal}', file_name: '{/literal}{$file_name}{literal}'}
-            $.ajax({
-                url: action,
-                type: method,
-                data: data
-            }).done(function (data) {
-                console.log(data);
-                if (data === 'error') {
-                    document.location.href = '{/literal}{$base_url}{literal}error';
-                } else {
-                    $('#bar').width(data + '%').html(data + '%');
-                    if (data === '100') {
-                        document.location.href = '{/literal}{$base_url}{literal}show/{/literal}{$file_name}{literal}';
+        $(function () {
+            var interval = setInterval(get_progress, 2000);
+            function get_progress() {
+                var action = 'duration',
+                        method = 'POST',
+                        data = {duration: '{/literal}{$duration}{literal}', file_name: '{/literal}{$file_name}{literal}'}
+                $.ajax({
+                    url: action,
+                    type: method,
+                    data: data
+                }).done(function (data) {
+                    if (data === 'error') {
+                        document.location.href = '{/literal}{$base_url}{literal}error';
+                    } else {
+                        $('#bar').width(data + '%').html(data + '%');
+                        console.log(data);
+                        if (data === '100') {
+                            document.location.href = '{/literal}{$base_url}{literal}show/{/literal}{$file_name}{literal}';
+                        }
+                        if (data === '420') {
+                            // hier wird alles wieder weggemacht wenns läuft
+                            alert('Fehler beim konvertieren, ich arbeite gerade am fehler, versuchs mal im anderen format(z.b webm)');
+                            clearInterval(interval);
+                            document.location.href = '{/literal}{$base_url}{literal}';
+                        }
                     }
-                }
-            });
-        }
-    });
+                });
+             }
+        });
     {/literal}
 </script>

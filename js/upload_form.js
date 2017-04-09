@@ -1,7 +1,12 @@
 $(function () {
     var bar = $('#upload_bar');
     var status = $('#status');
-
+    
+    $('#support').on('click', function (event) {
+        document.getElementById("supportadd").style.display = "flex";
+        window.scrollTo(0,document.body.scrollHeight);
+    });
+    
     $('#upload_form').ajaxForm({
         beforeSend: function () {
             status.empty();
